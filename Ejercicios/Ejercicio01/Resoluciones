@@ -1,0 +1,167 @@
+MYSQL 
+ejercicio01 - https://campusvirtual.univalle.edu.co/moodle/pluginfile.php/671061/mod_resource/content/1/Gu%C3%ADa%20ejercicios%20SQL-1.pdf
+/*Empleado (nDIEmp (id) , nomEmp (nombre), sexEmp (sexo), fecNac (fecha nacimiento), fecIncorporacion (, salEmp, comis, 
+codSuc, jefeDI, cargo, nroDepto) 
+Departamento (codDepto, nombreDpto, ciudad, director) */
+
+
+create database ejercicio01;
+
+use ejercicio01;
+
+create table ejercicio01.empleado(
+nDIEmp int(11)  not null primary key auto_increment,
+ nomEmp varchar(40) not null ,
+ sexEmp varchar(20) not null,
+ fecNac datetime not null,
+ fecIncorporacion datetime not null,
+ salEmp double not null,
+ comis varchar(40),
+codSuc int(11),
+ jefeDI int(11) not null,
+ cargo varchar(40) not null,
+ nroDepto int(11) not null);
+ 
+ create table ejercicio01.departamento(
+ codDepto int(11) not null,
+ nombreDpto varchar(40) not null,
+ ciudad varchar(40) not null,
+ director varchar(100)
+ );
+ 
+ 
+/*1. Obtener los datos completos de los empleados. */
+select * from empleado;
+
+
+/*2. Obtener los datos completos de los departamentos */
+select * from departamento;
+
+
+/*Store procedure para insert empleado*/
+DELIMITER $$
+CREATE PROCEDURE cargar_empleado(p_nomEmp varchar(40), p_sexEmp varchar(20), p_fecNac datetime , p_fecIncorporacion datetime,
+p_salEmp double, p_codSuc int(11), p_jefeDI int(11), p_cargo varchar (40), p_nroDepto int(11))
+BEGIN
+  INSERT INTO ejercicio01.empleado(nDIEmp, nomEmp, sexEmp, fecNac, fecIncorporacion, salEmp, codSuc, jefeDI, cargo, nroDepto)
+  VALUES(p_nomEmp, p_sexEmp, p_fecNac , p_fecIncorporacion,p_salEmp, p_codSuc, p_jefeDI , p_cargo, p_nroDepto );
+  END$$
+DELIMITER ;
+
+drop procedure cargar_empleado;/*error al crear el procedure, para utilizar unicamente fechas se usa DATE*/
+
+DELIMITER $$
+CREATE PROCEDURE cargar_empleado(p_nomEmp varchar(40), p_sexEmp varchar(20), p_fecNac date , p_fecIncorporacion date,
+p_salEmp float, p_codSuc int(11), p_jefeDI int(11), p_cargo varchar (40), p_nroDepto int(11))
+BEGIN
+  INSERT INTO ejercicio01.empleado(nomEmp, sexEmp, fecNac, fecIncorporacion, salEmp, codSuc, jefeDI, cargo, nroDepto)
+  VALUES(p_nomEmp, p_sexEmp, p_fecNac , p_fecIncorporacion,p_salEmp, p_codSuc, p_jefeDI , p_cargo, p_nroDepto );
+  END$$
+DELIMITER ;
+
+
+/*ejecuto store procedure*/
+CALL cargar_empleado('Catalina Ruiz','Femenino','1988/10/09' , '1999/02/07' ,34000.00,005,1, 'Secretaria',11);
+
+
+/*3. Obtener los datos de los empleados con cargo 'Secretaria'.*/
+select * from ejercicio01.empleado where cargo = 'secretaria';
+
+
+/*4. Obtener el nombre y salario de los empleados. */
+select nomEmp,salEmp from ejercicio01.empleado;
+
+
+/*creo empleados con categoria de vendedor*/
+CALL cargar_empleado('Pepito Delarosa','Masculino','1989/10/03' , '2003/02/07' ,29000.00,004,3, 'Vendedor',12);
+CALL cargar_empleado('Mariana Lopez','Femenino','1994/08/23' , '2007/12/24' ,29000.00,004,3, 'Vendedor',12);
+
+
+/*5. Obtener los datos de los empleados vendedores, ordenado por nombre.*/
+select * from empleado where cargo = 'vendedor' order by nomemp ASC;
+
+
+/*stored procedure para insert departamentos*/
+DELIMITER $$
+CREATE PROCEDURE crear_departamento(p_codDepto int(11), p_nombreDpto varchar(40), p_ciudad varchar(40), p_director varchar(100))
+BEGIN
+  INSERT INTO ejercicio01.departamento(codDepto, nombreDpto, ciudad, director)
+  VALUES(p_codDepto, p_nombreDpto, p_ciudad, p_director);
+  END$$
+DELIMITER ;
+
+
+/*ejecuto insert departamentos*/
+CALL crear_departamento(12,'Ventas','Carlos Paz' , 'Ricardo Milos');
+
+CALL crear_departamento(11, 'Secretaria', 'Calamuchita', 'Nora Naranjo');
+
+
+/*6. Listar el nombre de los departamentos*/
+select nombredpto from departamento;
+
+
+/*7. Listar el nombre de los departamentos, ordenado por nombre*/
+select nombredpto from departamento order by nombredpto ASC;
+
+
+/* 8. Listar el nombre de los departamentos, ordenado por ciudad*/ 
+select nombredpto from departamento order by ciudad ASC;
+
+
+/*9. Listar el nombre de los departamentos, ordenado por ciudad, en orden inverso */
+select nombredpto from departamento order by ciudad DESC;
+
+
+/*10. Obtener el nombre y cargo de todos los empleados, ordenado por salario*/
+select nomemp, cargo from empleado order by salemp ASC;
+
+
+
+/*11. Obtener el nombre y cargo de todos los empleados, ordenado por cargo y por salario*/
+select nomemp, cargo from empleado order by salemp ASC, cargo ASC;
+
+
+/*12. Obtener el nombre y cargo de todos los empleados, en orden inverso por cargo*/
+select nomemp, cargo from empleado order by cargo DESC;
+
+
+/*creo nuevos departamentos*/
+CALL crear_departamento(2003, 'Seguridad', 'Santa Rosa', 'Michelle Rodriguez');
+CALL crear_departamento(2000, 'Contabilidad', 'Tandil', 'Dayren Anderson');
+
+
+/*cargo nuevos empleados*/
+call cargar_empleado('Laureano Albornoz','Masculino','1993/02/01','2012/04/24',24000.00,624,3, 'Contador Publico', 2000);
+call cargar_empleado('Mariano Martinez','Masculino','1987/04/29','2001/07/09',28000.00,624,3, 'Contador Publico', 2000);
+call cargar_empleado('Thomas Shelby','Masculino','1990/05/01','2010/09/13',25000.00,624,3, 'Contador Publico', 2000);
+
+
+/*13. Listar los salarios de los empleados del departamento 2000 */
+select salemp from empleado where nrodepto = 2000;
+
+
+/*14. Listar los salarios de los empleados del departamento 2000, ordenado por nombre*/
+select salemp from empleado where nrodepto = 2000 order by nomemp ASC;
+
+
+/*15. Listar todos los salarios*/
+select salemp from empleado;
+
+
+/*16. Listar los departamentos que sean diferentes, ordenados por codigo */
+select * from departamento order by codDepto ASC;
+
+
+/*17. Listar los diferentes salarios*/
+select salemp from empleado;
+
+
+/*creo nuevos departamentos*/
+CALL crear_departamento(3000, 'Monitoreo', 'San Carlos de Bariloche' , 'Lucila Aguilar');
+
+
+/*cargo nuevos empleados*/
+call cargar_empleado('Monica Lopez','Femenino','1996/03/15','2011/07/29',31000.00,666,4, 'Investigadora', 3000);
+call cargar_empleado('Arthur Shelby','Masculino','1986/07/08','2000/08/09',33000.00,666,4, 'Investigador', 3000);
+call cargar_empleado('Michael Gray','Masculino','1988/11/11','1999/03/19',34000.00,666,4, 'Investigador', 3000);
